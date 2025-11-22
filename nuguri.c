@@ -50,8 +50,10 @@ int enemy_count = 0;
 Coin coins[MAX_COINS];
 int coin_count = 0;
 
-// 터미널 설정
-struct termios orig_termios;
+#ifndef _WIN32
+    // 터미널 설정
+    struct termios orig_termios;
+#endif
 
 // 함수 선언
 void disable_raw_mode();
@@ -64,6 +66,10 @@ void move_player(char input);
 void move_enemies();
 void check_collisions();
 int kbhit();
+void clrscr();
+void delay(int ms);
+int getch(void);
+
 
 int main() {
     srand(time(NULL));
@@ -76,14 +82,14 @@ int main() {
 
     while (!game_over && stage < MAX_STAGES) {
         if (kbhit()) {
-            c = getchar();
+            c = getch();
             if (c == 'q') {
                 game_over = 1;
                 continue;
             }
             if (c == '\x1b') {
-                getchar(); // '['
-                switch (getchar()) {
+                getch(); // '['
+                switch (getch()) {
                     case 'A': c = 'w'; break; // Up
                     case 'B': c = 's'; break; // Down
                     case 'C': c = 'd'; break; // Right
@@ -96,7 +102,7 @@ int main() {
 
         update_game(c);
         draw_game();
-        usleep(90000);
+        delay(90);
 
         if (map[stage][player_y][player_x] == 'E') {
             stage++;
@@ -105,7 +111,7 @@ int main() {
                 init_stage();
             } else {
                 game_over = 1;
-                printf("\x1b[2J\x1b[H");
+                clrscr();
                 printf("축하합니다! 모든 스테이지를 클리어했습니다!\n");
                 printf("최종 점수: %d\n", score);
             }
@@ -116,7 +122,11 @@ int main() {
     return 0;
 }
 
-
+#ifdef _WIN32
+// windows는 즉시 입력 환경이라 Raw 불필요 -> 빈 함수로 처리
+void disable_raw_mode() {}
+void enable_raw_mode() {}
+#else
 // 터미널 Raw 모드 활성화/비활성화
 void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
 void enable_raw_mode() {
@@ -126,6 +136,7 @@ void enable_raw_mode() {
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
+#endif
 
 // 맵 파일 로드
 void load_maps() {
@@ -177,7 +188,7 @@ void init_stage() {
 
 // 게임 화면 그리기
 void draw_game() {
-    printf("\x1b[2J\x1b[H");
+    clrscr();
     printf("Stage: %d | Score: %d\n", stage + 1, score);
     printf("조작: ← → (이동), ↑ ↓ (사다리), Space (점프), q (종료)\n");
 
@@ -307,23 +318,54 @@ void check_collisions() {
     }
 }
 
-// 비동기 키보드 입력 확인
-int kbhit() {
-    struct termios oldt, newt;
-    int ch;
-    int oldf;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
-    ch = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    fcntl(STDIN_FILENO, F_SETFL, oldf);
-    if(ch != EOF) {
-        ungetc(ch, stdin);
-        return 1;
+// Windows 환경
+#ifdef _WIN32
+    void clrscr() { system("cls");} // 클리어 화면
+    void delay(int ms) { Sleep(ms);} // ms 단위 딜레이
+    // Windows는 conio.h의 kbhit(), getch() 사용
+#else
+    // 클리어 화면
+    void clrscr() {
+        printf("\033[2J\033[1;1H");
+        fflush(stdout);
     }
-    return 0;
-}
+
+    // ms 단위 딜레이 (usleep은 마이크로초 단위 -> ms*1000)
+    void delay(int ms) {
+        usleep(ms*1000);
+    }
+
+    // 비동기 키보드 입력 확인 (non-blocking 키 입력 확인)
+    int kbhit() {
+        struct termios oldt, newt;
+        int ch;
+        int oldf;
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+        ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, oldf);
+        if(ch != EOF) {
+            ungetc(ch, stdin);
+            return 1;
+        }
+        return 0;
+    }
+
+    // getch() 문자 입력
+    int getch(void) {
+        struct termios oldattr, newattr;
+        int ch;
+        tcgetattr(STDIN_FILENO, &oldattr);
+        newattr = oldattr;
+        newattr.c_lflag &= ~(ICANON|ECHO);
+        tcsetattr(STDERR_FILENO, TCSANOW, &newattr);
+        ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
+        return ch;
+    }
+#endif
