@@ -55,8 +55,18 @@ void move_player(char input);
 void move_enemies();
 void check_collisions();
 int kbhit();
+int getch();
+void clrscr();
+void title();
+void game_over();
+void ending();
 
 int main() {
+
+    title();
+
+    ending();
+
     srand(time(NULL));
     enable_raw_mode();
     load_maps();
@@ -96,9 +106,7 @@ int main() {
                 init_stage();
             } else {
                 game_over = 1;
-                printf("\x1b[2J\x1b[H");
-                printf("축하합니다! 모든 스테이지를 클리어했습니다!\n");
-                printf("최종 점수: %d\n", score);
+                ending();
             }
         }
     }
@@ -168,7 +176,7 @@ void init_stage() {
 
 // 게임 화면 그리기
 void draw_game() {
-    printf("\x1b[2J\x1b[H");
+    clrscr();
     printf("Stage: %d | Score: %d\n", stage + 1, score);
     printf("조작: ← → (이동), ↑ ↓ (사다리), Space (점프), q (종료)\n");
 
@@ -317,4 +325,74 @@ int kbhit() {
         return 1;
     }
     return 0;
+}
+
+int getch(void) {
+        struct termios oldattr, newattr;
+        int ch;
+        tcgetattr(STDIN_FILENO, &oldattr);
+        newattr = oldattr;
+        newattr.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
+        ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
+        return ch;
+}
+
+void clrscr() {
+        printf("\033[2J\033[1;1H");
+        fflush(stdout);
+}
+
+void title() {
+    clrscr();
+
+    printf("\n\n");
+    printf("      #  # #  # #### #  # ###  ###\n");
+    printf("      ## # #  # #    #  # #  #  # \n");
+    printf("      # ## #  # # ## #  # ###   # \n");
+    printf("      #  # #  # #  # #  # # #   # \n");
+    printf("      #  # #### #### #### #  # ###\n");
+    
+    printf("\n\n\n");
+    printf("          PRESS ENTER TO START\n");
+    printf("              (q to Quit)\n");
+
+    if(getch() == 'q') {
+        printf("\n게임을 종료합니다.\n");
+        getch();
+        clrscr();
+        exit(0);
+    }
+    else return;
+}
+
+void game_over() {
+    clrscr();
+    printf("게임 오버!\n");
+    printf("최종 점수: %d\n", score);
+    printf("엔터 키를 눌러 종료하세요.\n");
+    while(getch() != '\n');
+    clrscr();
+    disable_raw_mode();
+    exit(0);
+}
+
+void ending() {
+    clrscr();
+
+    printf("\n\n");
+    printf("   ##   #    #       ###  #    ###   ##  ### \n");
+    printf("  #  #  #    #      #     #    #    #  # #  #\n");
+    printf("  ####  #    #      #     #    ###  #### ### \n");
+    printf("  #  #  #    #      #     #    #    #  # # # \n");
+    printf("  #  #  #### ####    ###  #### ###  #  # #  #\n");
+    printf("\n\n");
+    printf("               최종 점수: %d\n", score);
+    printf("           PRESS ANY KEY TO QUIT\n");
+
+    while(getch() != '\n');
+    clrscr();
+    disable_raw_mode();
+    exit(0);
 }
