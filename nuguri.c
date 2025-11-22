@@ -1,10 +1,19 @@
+// 크로스 플랫폼 호환을 위한 공통 헤더
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
 #include <time.h>
+
+// Windows 환경
+#ifdef _WIN32
+    #include <windows.h> // Sleep(), system("cls") 등 사용
+    #include <conio.h> // getch(), kbhit() 등 사용
+// Linux 또는 macOS 환경
+#else
+    #include <unistd.h> // usleep(), read() 등 사용
+    #include <termios.h> // 터미널 속성 제어(버퍼링/에코 비활성화 등)
+    #include <fcntl.h> // 논블로킹 입력 등
+#endif // 운영체제 분기 종료
 
 // 맵 및 게임 요소 정의 (수정된 부분)
 #define MAP_WIDTH 40  // 맵 너비를 40으로 변경
