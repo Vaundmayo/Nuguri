@@ -69,9 +69,17 @@ int kbhit();
 void clrscr();
 void delay(int ms);
 int getch(void);
+void gotoxy(int x, int y);
+void clearbuff();
 
 
 int main() {
+    // Windows 콘솔을 UTF-8 모드로 설정 : 한글 깨짐 방지
+    #ifdef _WIN32
+        SetConsoleOutputCP(65001); // UTF-8 출력
+        SetConsoleCP(65001); // UTF-8 입력
+    #endif
+    
     srand(time(NULL));
     enable_raw_mode();
     load_maps();
@@ -369,3 +377,13 @@ void check_collisions() {
         return ch;
     }
 #endif
+
+void gotoxy(int x, int y) {
+    printf("\033[%d;%dH",y,x);
+    fflush(stdout);
+}
+
+void clearbuff() {
+    int c;
+    while((c = getchar()) != '\n' && c != EOF);
+}
