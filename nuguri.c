@@ -71,6 +71,7 @@ void delay(int ms);
 int getch(void);
 void gotoxy(int x, int y);
 void hide_cursor();
+void show_cursor();
 
 
 int main() {
@@ -79,6 +80,8 @@ int main() {
         SetConsoleOutputCP(65001); // UTF-8 출력
         SetConsoleCP(65001); // UTF-8 입력
     #endif
+
+    hide_cursor();
     
     srand(time(NULL));
     enable_raw_mode();
@@ -127,6 +130,7 @@ int main() {
     }
 
     disable_raw_mode();
+    show_cursor();
     return 0;
 }
 
@@ -385,3 +389,15 @@ void check_collisions() {
         return ch;
     }
 #endif
+
+// 커서 숨기기
+void hide_cursor() {
+    printf("\x1b[?25l");
+    fflush(stdout);
+}
+
+// 커서 다시 보이기
+void show_cursor() {
+    printf("\x1b[?25h");
+    fflush(stdout);
+}
