@@ -70,7 +70,8 @@ void clrscr();
 void delay(int ms);
 int getch(void);
 void gotoxy(int x, int y);
-void clearbuff();
+void hide_cursor();
+void show_cursor();
 
 
 int main() {
@@ -79,6 +80,8 @@ int main() {
         SetConsoleOutputCP(65001); // UTF-8 출력
         SetConsoleCP(65001); // UTF-8 입력
     #endif
+
+    hide_cursor();
     
     srand(time(NULL));
     enable_raw_mode();
@@ -127,6 +130,7 @@ int main() {
     }
 
     disable_raw_mode();
+    show_cursor();
     return 0;
 }
 
@@ -328,10 +332,18 @@ void check_collisions() {
 
 // Windows 환경
 #ifdef _WIN32
-    void clrscr() { system("cls");} // 클리어 화면
+    void gotoxy(int x, int y) {
+        COORD pos={(x-1),(y-1)};
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+    }
+    void clrscr() {gotoxy(1,1);} // 클리어 화면
     void delay(int ms) { Sleep(ms);} // ms 단위 딜레이
     // Windows는 conio.h의 kbhit(), getch() 사용
 #else
+    void gotoxy(int x, int y) {
+        printf("\033[%d;%dH",y,x);
+        fflush(stdout);
+    }
     // 클리어 화면
     void clrscr() {
         printf("\033[2J\033[1;1H");
@@ -378,12 +390,14 @@ void check_collisions() {
     }
 #endif
 
-void gotoxy(int x, int y) {
-    printf("\033[%d;%dH",y,x);
+// 커서 숨기기
+void hide_cursor() {
+    printf("\x1b[?25l");
     fflush(stdout);
 }
 
-void clearbuff() {
-    int c;
-    while((c = getchar()) != '\n' && c != EOF);
+// 커서 다시 보이기
+void show_cursor() {
+    printf("\x1b[?25h");
+    fflush(stdout);
 }
