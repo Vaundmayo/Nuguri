@@ -73,7 +73,9 @@ int getch(void);
 void gotoxy(int x, int y);
 void hide_cursor();
 void show_cursor();
-
+void title();
+void game_over();
+void ending();
 
 int main() {
     // Windows 콘솔을 UTF-8 모드로 설정 : 한글 깨짐 방지
@@ -82,7 +84,7 @@ int main() {
         SetConsoleCP(65001); // UTF-8 입력
     #endif
 
-    hide_cursor();
+    title();
     
     srand(time(NULL));
     enable_raw_mode();
@@ -123,9 +125,7 @@ int main() {
                 init_stage();
             } else {
                 game_over = 1;
-                clrscr();
-                printf("축하합니다! 모든 스테이지를 클리어했습니다!\n");
-                printf("최종 점수: %d\n", score);
+                ending();
             }
         }
     }
@@ -322,13 +322,7 @@ void check_collisions() {
         if (player_x == enemies[i].x && player_y == enemies[i].y) {
             life--;
 	    if(life<=0){
-		clrscr();
-		printf("----------------------------------------\n");
-		printf("                Game Over               \n");
-		printf("----------------------------------------\n");
-		printf("                            최종점수: %d\n", score);
-    		disable_raw_mode();
-    		exit(0);
+		game_over();
 	    }
 	    init_stage();
             return;
@@ -412,4 +406,63 @@ void hide_cursor() {
 void show_cursor() {
     printf("\x1b[?25h");
     fflush(stdout);
+}
+
+void title() {
+    clrscr();
+    hide_cursor();
+
+    printf("\n\n");
+    printf("      #  # #  # #### #  # ###  ###\n");
+    printf("      ## # #  # #    #  # #  #  # \n");
+    printf("      # ## #  # # ## #  # ###   # \n");
+    printf("      #  # #  # #  # #  # # #   # \n");
+    printf("      #  # #### #### #### #  # ###\n");
+    
+    printf("\n\n\n");
+    printf("          PRESS ENTER TO START\n");
+    printf("              (q to Quit)\n");
+
+    if(getch() == 'q') {
+        printf("\n게임을 종료합니다.\n");
+        getch();
+        clrscr();
+        exit(0);
+    }
+    else return;
+}
+
+void game_over() {
+    clrscr();
+    printf("----------------------------------------\n");
+	printf("                Game Over               \n");
+	printf("----------------------------------------\n");
+    printf("                           최종점수: %d\n", score);
+    printf("엔터 키를 눌러 종료하세요.\n");
+    while(getch() != '\n');
+
+    clrscr();
+    disable_raw_mode();
+    show_cursor();
+    exit(0);
+}
+
+void ending() {
+    clrscr();
+
+    printf("\n\n");
+    printf("   ##   #    #       ###  #    ###   ##  ### \n");
+    printf("  #  #  #    #      #     #    #    #  # #  #\n");
+    printf("  ####  #    #      #     #    ###  #### ### \n");
+    printf("  #  #  #    #      #     #    #    #  # # # \n");
+    printf("  #  #  #### ####    ###  #### ###  #  # #  #\n");
+    printf("\n\n");
+    printf("               최종 점수: %d\n", score);
+    printf("           PRESS ANY KEY TO QUIT\n");
+    while(getch() != '\n');
+    
+    clrscr();
+    disable_raw_mode();
+    show_cursor();
+    exit(0);
 }
