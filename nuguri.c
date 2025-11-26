@@ -33,6 +33,84 @@ typedef struct {
     int collected;
 } Coin;
 
+typedef enum {
+    sound_JUMP,
+    sound_COIN,
+    sound_ENEMY,
+    sound_CLEAR,
+    sound_GAMEOVER
+} Play;
+
+#ifdef _WIN32
+void playsound(Play type) {
+    switch(type) {
+        case sound_JUMP:
+            Beep(800,50);
+            break;
+        case sound_COIN:
+            Beep(1000,40);
+            Beep(1400,30);
+            break;
+        case sound_ENEMY:
+            Beep(300,100);
+            Beep(200,50);
+            break;
+        case sound_CLEAR:
+            Beep(1000,100);
+            Beep(1200,100);
+            Beep(1500,200);
+            break;
+        case sound_GAMEOVER:
+            Beep(400,200);
+            Beep(300,100);
+            Beep(200,100);
+            break;
+        default:
+            Beep(500,500);
+            break;
+    }
+}
+#else
+void playsound(Play type) {
+    switch (type) {
+        case sound_JUMP:
+            printf("\a");
+            usleep(100000);
+            break;
+        case sound_COIN:
+            printf("\a");
+            usleep(200000);
+            printf("\a");
+            break;
+        case sound_ENEMY:
+            printf("\a");
+            usleep(100000);
+            printf("\a");
+            break;
+        case sound_CLEAR:
+            printf("\a");
+            usleep(100000);
+            printf("\a");
+            usleep(200000);
+            printf("\a");
+            break;
+        case sound_GAMEOVER:
+            printf("\a");
+            usleep(400000);
+            printf("\a");
+            usleep(400000);
+            printf("\a");
+            usleep(400000);
+            printf("\a");
+            break; 
+        default:
+            printf("\a");
+            break;
+    }
+    fflush(stdout);
+}
+#endif
+
 // 전역 변수
 char map[MAX_STAGES][MAP_HEIGHT][MAP_WIDTH + 1];
 int player_x, player_y;
@@ -120,6 +198,7 @@ int main() {
         if (map[stage][player_y][player_x] == 'E') {
             stage++;
             score += 100;
+            playsound(sound_CLEAR);
             if (stage < MAX_STAGES) {
                 init_stage();
             } else {
@@ -266,6 +345,7 @@ void move_player(char input) {
             if (!is_jumping && (floor_tile == '#' || on_ladder)) {
                 is_jumping = 1;
                 velocity_y = -2;
+                playsound(sound_JUMP);
             }
             break;
     }
@@ -324,6 +404,7 @@ void check_collisions() {
     for (int i = 0; i < enemy_count; i++) {
         if (player_x == enemies[i].x && player_y == enemies[i].y) {
             life--;
+            playsound(sound_ENEMY);
             clrscr(); // 하트 개수 갱신을 위해 화면 클리어
 	    if(life<=0){
 		game_over();
@@ -336,6 +417,7 @@ void check_collisions() {
         if (!coins[i].collected && player_x == coins[i].x && player_y == coins[i].y) {
             coins[i].collected = 1;
             score += 20;
+            playsound(sound_COIN);
         }
     }
 }
@@ -439,6 +521,7 @@ void title() {
 
 void game_over() {
     clrscr();
+    playsound(sound_GAMEOVER);
     printf("----------------------------------------\n");
 	printf("                Game Over               \n");
 	printf("----------------------------------------\n");
