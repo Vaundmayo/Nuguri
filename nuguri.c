@@ -87,7 +87,6 @@ int main() {
     title();
     
     srand(time(NULL));
-    enable_raw_mode();
     load_maps();
     init_stage();
 
@@ -201,7 +200,11 @@ void init_stage() {
 
 // 게임 화면 그리기
 void draw_game() {
-    clrscr();
+    #ifdef _WIN32
+        gotoxy(1, 1);
+    #else
+        clrscr();
+    #endif
     printf("Stage: %d | Score: %d\n", stage + 1, score);
     printf("Life :%d ", life);
     for(int i=0; i<life; i++) printf("❤");
@@ -321,6 +324,7 @@ void check_collisions() {
     for (int i = 0; i < enemy_count; i++) {
         if (player_x == enemies[i].x && player_y == enemies[i].y) {
             life--;
+            clrscr();
 	    if(life<=0){
 		game_over();
 	    }
@@ -342,7 +346,7 @@ void check_collisions() {
         COORD pos={(x-1),(y-1)};
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
     }
-    void clrscr() {gotoxy(1,1);} // 클리어 화면
+    void clrscr() {system("cls");} // 클리어 화면
     void delay(int ms) { Sleep(ms);} // ms 단위 딜레이
     // Windows는 conio.h의 kbhit(), getch() 사용
 #else
@@ -411,6 +415,7 @@ void show_cursor() {
 void title() {
     clrscr();
     hide_cursor();
+    enable_raw_mode();
 
     printf("\n\n");
     printf("      #  # #  # #### #  # ###  ###\n");
@@ -439,8 +444,8 @@ void game_over() {
 	printf("----------------------------------------\n");
     printf("                           최종점수: %d\n", score);
     printf("엔터 키를 눌러 종료하세요.\n");
-    while(getch() != '\n');
-
+    
+    getch();
     clrscr();
     disable_raw_mode();
     show_cursor();
@@ -459,8 +464,8 @@ void ending() {
     printf("\n\n");
     printf("               최종 점수: %d\n", score);
     printf("           PRESS ANY KEY TO QUIT\n");
-    while(getch() != '\n');
     
+    getch();
     clrscr();
     disable_raw_mode();
     show_cursor();
