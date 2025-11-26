@@ -201,13 +201,13 @@ void init_stage() {
 // 게임 화면 그리기
 void draw_game() {
     #ifdef _WIN32
-        gotoxy(1, 1);
+        gotoxy(1, 1); // 윈도우에서는 좌표만 이동
     #else
-        clrscr();
+        clrscr(); // 유닉스 계열에서는 화면 전체 클리어
     #endif
     printf("Stage: %d | Score: %d\n", stage + 1, score);
     printf("Life :%d ", life);
-    for(int i=0; i<life; i++) printf("❤");
+    for(int i=0; i<life; i++) printf("❤"); // 남은 생명만큼 하트 출력
     printf("\n조작: ← → (이동), ↑ ↓ (사다리), Space (점프), q (종료)\n");
 
     char display_map[MAP_HEIGHT][MAP_WIDTH + 1];
@@ -324,7 +324,7 @@ void check_collisions() {
     for (int i = 0; i < enemy_count; i++) {
         if (player_x == enemies[i].x && player_y == enemies[i].y) {
             life--;
-            clrscr();
+            clrscr(); // 하트 개수 갱신을 위해 화면 클리어
 	    if(life<=0){
 		game_over();
 	    }
