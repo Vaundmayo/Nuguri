@@ -48,20 +48,19 @@ void playsound(Play type) {
             Beep(800,50);
             break;
         case sound_COIN:
-            Beep(1000,40);
-            Beep(1400,30);
+            Beep(1800,50);
             break;
         case sound_ENEMY:
-            Beep(300,100);
+            Beep(400,50);
             Beep(200,50);
             break;
         case sound_CLEAR:
             Beep(1000,100);
             Beep(1200,100);
-            Beep(1500,200);
+            Beep(1500,100);
             break;
         case sound_GAMEOVER:
-            Beep(400,200);
+            Beep(400,100);
             Beep(300,100);
             Beep(200,100);
             break;
@@ -75,32 +74,23 @@ void playsound(Play type) {
     switch (type) {
         case sound_JUMP:
             printf("\a");
-            usleep(100000);
             break;
         case sound_COIN:
             printf("\a");
-            usleep(200000);
             printf("\a");
             break;
         case sound_ENEMY:
             printf("\a");
-            usleep(100000);
-            printf("\a");
             break;
         case sound_CLEAR:
             printf("\a");
-            usleep(100000);
             printf("\a");
-            usleep(200000);
             printf("\a");
             break;
         case sound_GAMEOVER:
             printf("\a");
-            usleep(400000);
             printf("\a");
-            usleep(400000);
             printf("\a");
-            usleep(400000);
             printf("\a");
             break; 
         default:
@@ -521,13 +511,13 @@ void title() {
 
 void game_over() {
     clrscr();
-    playsound(sound_GAMEOVER);
     printf("----------------------------------------\n");
 	printf("                Game Over               \n");
 	printf("----------------------------------------\n");
     printf("                           최종점수: %d\n", score);
     printf("엔터 키를 눌러 종료하세요.\n");
-    
+    playsound(sound_GAMEOVER);
+
     getch();
     clrscr();
     disable_raw_mode();
@@ -547,7 +537,8 @@ void ending() {
     printf("\n\n");
     printf("               최종 점수: %d\n", score);
     printf("           PRESS ANY KEY TO QUIT\n");
-    
+    playsound(sound_CLEAR);
+
     getch();
     clrscr();
     disable_raw_mode();
