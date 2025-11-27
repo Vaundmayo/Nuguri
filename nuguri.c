@@ -134,22 +134,6 @@ int main() {
     return 0;
 }
 
-#ifdef _WIN32
-// windows는 즉시 입력 환경이라 Raw 불필요 -> 빈 함수로 처리
-void disable_raw_mode() {}
-void enable_raw_mode() {}
-#else
-// 터미널 Raw 모드 활성화/비활성화
-void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
-void enable_raw_mode() {
-    tcgetattr(STDIN_FILENO, &orig_termios);
-    atexit(disable_raw_mode);
-    struct termios raw = orig_termios;
-    raw.c_lflag &= ~(ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-}
-#endif
-
 // 맵 파일 로드
 void load_maps() {
     FILE *file = fopen("map.txt", "r");
@@ -342,6 +326,10 @@ void check_collisions() {
 
 // Windows 환경
 #ifdef _WIN32
+    // windows는 즉시 입력 환경이라 Raw 불필요 -> 빈 함수로 처리
+    void disable_raw_mode() {}
+    void enable_raw_mode() {} 
+
     void gotoxy(int x, int y) {
         COORD pos={(x-1),(y-1)};
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
@@ -350,6 +338,16 @@ void check_collisions() {
     void delay(int ms) { Sleep(ms);} // ms 단위 딜레이
     // Windows는 conio.h의 kbhit(), getch() 사용
 #else
+    // 터미널 Raw 모드 활성화/비활성화
+    void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
+    void enable_raw_mode() {
+        tcgetattr(STDIN_FILENO, &orig_termios);
+        atexit(disable_raw_mode);
+        struct termios raw = orig_termios;
+        raw.c_lflag &= ~(ECHO | ICANON);
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    }
+
     void gotoxy(int x, int y) {
         printf("\033[%d;%dH",y,x);
         fflush(stdout);
