@@ -33,6 +33,14 @@ typedef struct {
     int collected;
 } Coin;
 
+typedef enum {
+    sound_JUMP,
+    sound_COIN,
+    sound_ENEMY,
+    sound_CLEAR,
+    sound_GAMEOVER
+} Play;
+
 // 전역 변수
 char map[MAX_STAGES][MAP_HEIGHT][MAP_WIDTH + 1];
 int player_x, player_y;
@@ -76,6 +84,7 @@ void show_cursor();
 void title();
 void game_over();
 void ending();
+void playsound(Play type);
 
 int main() {
     // Windows 콘솔을 UTF-8 모드로 설정 : 한글 깨짐 방지
@@ -138,6 +147,7 @@ int main() {
         if (map[stage][player_y][player_x] == 'E') {
             stage++;
             score += 100;
+            playsound(sound_CLEAR);
             if (stage < MAX_STAGES) {
                 init_stage();
             } else {
@@ -156,6 +166,33 @@ int main() {
 // windows는 즉시 입력 환경이라 Raw 불필요 -> 빈 함수로 처리
 void disable_raw_mode() {}
 void enable_raw_mode() {}
+void playsound(Play type) {
+    switch(type) {
+        case sound_JUMP:
+            Beep(800,50);
+            break;
+        case sound_COIN:
+            Beep(1800,50);
+            break;
+        case sound_ENEMY:
+            Beep(400,50);
+            Beep(200,50);
+            break;
+        case sound_CLEAR:
+            Beep(1000,100);
+            Beep(1200,100);
+            Beep(1500,100);
+            break;
+        case sound_GAMEOVER:
+            Beep(400,100);
+            Beep(300,100);
+            Beep(200,100);
+            break;
+        default:
+            Beep(500,500);
+            break;
+    }
+}
 #else
 // 터미널 Raw 모드 활성화/비활성화
 void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
@@ -165,6 +202,39 @@ void enable_raw_mode() {
     struct termios raw = orig_termios;
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+}
+void playsound(Play type) {
+    switch (type) {
+        case sound_JUMP:
+            printf("\a");
+            break;
+        case sound_COIN:
+            printf("\a");
+            break;
+        case sound_ENEMY:
+            printf("\a");
+            break;
+        case sound_CLEAR:
+            printf("\a"); fflush(stdout); // 소리 즉시 출력 (버퍼 비우기)
+            delay(300);
+            printf("\a"); fflush(stdout);
+            delay(300);
+            printf("\a");
+            break;
+        case sound_GAMEOVER:
+            printf("\a"); fflush(stdout); // 소리 즉시 출력 (버퍼 비우기)
+            delay(200);
+            printf("\a"); fflush(stdout);
+            delay(200);
+            printf("\a"); fflush(stdout);
+            delay(200);
+            printf("\a");
+            break; 
+        default:
+            printf("\a");
+            break;
+    }
+    fflush(stdout);
 }
 #endif
 
@@ -284,6 +354,7 @@ void move_player(char input) {
             if (!is_jumping && (floor_tile == '#' || on_ladder)) {
                 is_jumping = 1;
                 velocity_y = -2;
+                playsound(sound_JUMP);
             }
             break;
     }
@@ -342,6 +413,7 @@ void check_collisions() {
     for (int i = 0; i < enemy_count; i++) {
         if (player_x == enemies[i].x && player_y == enemies[i].y) {
             life--;
+            playsound(sound_ENEMY);
             clrscr(); // 하트 개수 갱신을 위해 화면 클리어
 	    if(life<=0){
 		game_over();
@@ -354,6 +426,7 @@ void check_collisions() {
         if (!coins[i].collected && player_x == coins[i].x && player_y == coins[i].y) {
             coins[i].collected = 1;
             score += 20;
+            playsound(sound_COIN);
         }
     }
 }
@@ -463,6 +536,7 @@ void game_over() {
     printf("----------------------------------------\n");
     printf("                            최종점수: %d\n", score);
     printf("      재시작 : ENTER  |  종료 : Q       \n");
+    playsound(sound_GAMEOVER);
 
     int key;
     while(1){
@@ -500,7 +574,8 @@ void ending() {
     printf("\n\n");
     printf("               최종 점수: %d\n", score);
     printf("           PRESS ANY KEY TO QUIT\n");
-    
+    playsound(sound_CLEAR);
+
     getch();
     clrscr();
     disable_raw_mode();
