@@ -100,7 +100,7 @@ int main() {
 
 	#ifdef _WIN32
 	    // Windows 방향키 입력 처리
-	    if (c == 0 || c == -32 || c == 224) {
+	    if (c == 0 || c == -32 || c == 224) { //224 : unsigned, -32 : signed char
 	        int arrow = getch();
 	        switch (arrow) {
 	            case 72: c = 'w'; break;
@@ -223,6 +223,7 @@ void draw_game() {
     printf("Stage: %d | Score: %d\n", stage + 1, score);
     printf("Life :%d ", life);
     for(int i=0; i<life; i++) printf("❤");
+    for(int i=life; i<3; i++) printf("  ");
     printf("\n조작: ← → (이동), ↑ ↓ (사다리), Space (점프), q (종료)\n");
 
     char display_map[MAP_HEIGHT][MAP_WIDTH + 1];
@@ -427,7 +428,11 @@ void show_cursor() {
 }
 
 void title() {
-    clrscr();
+    #ifdef _WIN32
+        system("cls");
+    #else
+        clrscr();
+    #endif
     hide_cursor();
 
     printf("\n\n");
@@ -451,12 +456,16 @@ void title() {
 }
 
 void game_over() {
-    clrscr();
+    #ifdef _WIN32
+        system("cls");
+    #else
+        clrscr();
+    #endif
     printf("----------------------------------------\n");
     printf("                Game Over               \n");
     printf("----------------------------------------\n");
     printf("                            최종점수: %d\n", score);
-    printf("엔터 키를 눌러 종료하세요.\n");
+    printf("      재시작 : ENTER  |  종료 : Q       \n");
     int key;
     while(1){
 	key = getch();
@@ -483,7 +492,11 @@ void game_over() {
 }
 
 void ending() {
-    clrscr();
+    #ifdef _WIN32
+        system("cls");
+    #else
+        clrscr();
+    #endif
 
     printf("\n\n");
     printf("   ##   #    #       ###  #    ###   ##  ### \n");
