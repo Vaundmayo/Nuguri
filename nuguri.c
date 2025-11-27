@@ -96,21 +96,39 @@ int main() {
 
     while (!game_over && stage < MAX_STAGES) {
         if (kbhit()) {
-            c = getch();
-            if (c == 'q') {
-                game_over = 1;
-                continue;
-            }
-            if (c == '\x1b') {
-                getch(); // '['
-                switch (getch()) {
-                    case 'A': c = 'w'; break; // Up
-                    case 'B': c = 's'; break; // Down
-                    case 'C': c = 'd'; break; // Right
-                    case 'D': c = 'a'; break; // Left
-                }
-            }
-        } else {
+	    c = getch();
+
+	#ifdef _WIN32
+	    // Windows 방향키 입력 처리
+	    if (c == 0 || c == -32 || c == 224) {
+	        int arrow = getch();
+	        switch (arrow) {
+	            case 72: c = 'w'; break;
+	            case 80: c = 's'; break;
+	            case 75: c = 'a'; break;
+	            case 77: c = 'd'; break;
+	        }
+	    }
+	#else
+	    // Linux 방향키 처리
+	    if (c == '\x1b') {
+	        getch(); // '['
+	        switch (getch()) {
+	            case 'A': c = 'w'; break;
+	            case 'B': c = 's'; break;
+	            case 'C': c = 'd'; break;
+	            case 'D': c = 'a'; break;
+	        }
+	    }
+	#endif
+	    if (c == 'q') {
+	        game_over = 1;
+	        continue;
+	    }
+
+	}
+	
+	else {
             c = '\0';
         }
 
@@ -360,7 +378,6 @@ void check_collisions() {
     void delay(int ms) {
         usleep(ms*1000);
     }
-
     // 비동기 키보드 입력 확인 (non-blocking 키 입력 확인)
     int kbhit() {
         struct termios oldt, newt;
@@ -394,6 +411,7 @@ void check_collisions() {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
         return ch;
     }
+
 #endif
 
 // 커서 숨기기
@@ -435,11 +453,28 @@ void title() {
 void game_over() {
     clrscr();
     printf("----------------------------------------\n");
-	printf("                Game Over               \n");
-	printf("----------------------------------------\n");
-    printf("                           최종점수: %d\n", score);
+    printf("                Game Over               \n");
+    printf("----------------------------------------\n");
+    printf("                            최종점수: %d\n", score);
     printf("엔터 키를 눌러 종료하세요.\n");
-    while(getch() != '\n');
+    int key;
+    while(1){
+	key = getch();
+	if(key == '\r' || key == '\n'){
+		stage = 0;
+		score = 0;
+		life = 3;
+		init_stage();
+		return;
+	}
+
+	if(key == 'q' || key == 'Q'){
+		clrscr();
+		disable_raw_mode();
+		show_cursor();
+		exit(0);
+	}
+    }
 
     clrscr();
     disable_raw_mode();
