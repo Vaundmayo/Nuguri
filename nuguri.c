@@ -235,7 +235,9 @@ void update_game(char input) {
 
 // 플레이어 이동 로직
 void move_player(char input) {
+    int before_x = player_x, before_y = player_y; // 이동 전 위치 저장
     int next_x = player_x, next_y = player_y;
+
     char floor_tile = (player_y + 1 < MAP_HEIGHT) ? map[stage][player_y + 1][player_x] : '#';
     char current_tile = map[stage][player_y][player_x];
 
@@ -288,6 +290,11 @@ void move_player(char input) {
     }
     
     if (player_y >= MAP_HEIGHT) init_stage();
+
+    // 벽 끼임 확인 -> x 되돌리기
+    if (player_x >= 0 && player_x < MAP_WIDTH && map[stage][next_y][player_x] == '#') {
+        player_x = before_x;
+    }
 }
 
 
