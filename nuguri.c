@@ -164,8 +164,6 @@ int main() {
 
 #ifdef _WIN32
 // windows는 즉시 입력 환경이라 Raw 불필요 -> 빈 함수로 처리
-void disable_raw_mode() {}
-void enable_raw_mode() {}
 void playsound(Play type) {
     switch(type) {
         case sound_JUMP:
@@ -194,15 +192,6 @@ void playsound(Play type) {
     }
 }
 #else
-// 터미널 Raw 모드 활성화/비활성화
-void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
-void enable_raw_mode() {
-    tcgetattr(STDIN_FILENO, &orig_termios);
-    atexit(disable_raw_mode);
-    struct termios raw = orig_termios;
-    raw.c_lflag &= ~(ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-}
 void playsound(Play type) {
     switch (type) {
         case sound_JUMP:
@@ -339,7 +328,9 @@ void update_game(char input) {
 
 // 플레이어 이동 로직
 void move_player(char input) {
+    int before_x = player_x; // 이동 전 위치 저장
     int next_x = player_x, next_y = player_y;
+
     char floor_tile = (player_y + 1 < MAP_HEIGHT) ? map[stage][player_y + 1][player_x] : '#';
     char current_tile = map[stage][player_y][player_x];
 
@@ -366,33 +357,63 @@ void move_player(char input) {
             player_y = next_y;
             is_jumping = 0;
             velocity_y = 0;
+        } else if (input == 'w' && next_y >= 0 && map[stage][next_y][player_x] == '#') { // 위로 올라갈때 다음칸이 '#'일 경우
+            // 벽 위칸이 비어있는지 확인
+            if(next_y-1 >= 0 && map[stage][next_y-1][player_x] != '#') {
+                player_y = next_y - 1; // 플레이어 위치를 벽 위로 이동
+                is_jumping = 0; // 점프 상태 해제
+                velocity_y = 0; // 속도 상태 해제
+            }
         }
     } 
     else {
+        // 점프 중일때
         if (is_jumping) {
-            next_y = player_y + velocity_y;
-            if(next_y < 0) next_y = 0;
-            velocity_y++;
+            int step = (velocity_y < 0) ? -velocity_y : velocity_y; // 현재 이동한 속도 절댓값 계산
+            int mov = (velocity_y < 0) ? -1 : 1; // 이동방향 : 음수 -> 위(-1), 양수 -> 아래(1)
 
-            if (velocity_y < 0 && next_y < MAP_HEIGHT && map[stage][next_y][player_x] == '#') {
-                velocity_y = 0;
-            } else if (next_y < MAP_HEIGHT) {
-                player_y = next_y;
+            // 속도만큼 1칸씩 이동하며 충돌 체크
+            for(int i = 0; i < step; i++) {
+                int ch_y = player_y + mov; // 1칸 이동했을때 위치 확인
+
+                // 천장, 바닥 충돌 체크
+                if(ch_y < 0 || ch_y >= MAP_HEIGHT) {
+                    velocity_y = 0; // 속도 멈춤
+                    if(ch_y < 0) ch_y = 0; // 천장 뚫고 나가는것 금지
+                    break;
+                }
+
+                // 벽 충돌 체크
+                if(map[stage][ch_y][player_x] == '#') {
+                    velocity_y = 0; // 충돌시 속도 0
+                    if(mov == 1) is_jumping = 0; // 아래 충돌시 착지
+                    break;
+                }
+                player_y = ch_y; // 충돌 없으면 1칸 이동
             }
-            
-            if ((player_y + 1 < MAP_HEIGHT) && map[stage][player_y + 1][player_x] == '#') {
-                is_jumping = 0;
-                velocity_y = 0;
+
+            // 중력 적용
+            if(is_jumping) {
+                velocity_y++; // 중력 가속도 : 속도 증가
+                if(velocity_y > 2) velocity_y = 2; // 낙하속도 2로 제한
             }
         } else {
+            // 점프 중이 아닐때 떨어짐 감지
             if (floor_tile != '#' && floor_tile != 'H') {
-                 if (player_y + 1 < MAP_HEIGHT) player_y++;
-                 else init_stage();
+                is_jumping = 1; // 점프 상태
+                velocity_y = 1; // 낙하 속도 적용
             }
         }
     }
     
     if (player_y >= MAP_HEIGHT) init_stage();
+
+    // 바닥 끼임 확인 -> x,y 되돌리기
+    if (player_x >= 0 && player_x < MAP_WIDTH && 
+        player_y >= 0 && player_y < MAP_HEIGHT &&
+        map[stage][next_y][player_x] == '#') {
+        player_x = before_x;
+    }
 }
 
 
@@ -433,6 +454,10 @@ void check_collisions() {
 
 // Windows 환경
 #ifdef _WIN32
+    // windows는 즉시 입력 환경이라 Raw 불필요 -> 빈 함수로 처리
+    void disable_raw_mode() {}
+    void enable_raw_mode() {} 
+
     void gotoxy(int x, int y) {
         COORD pos={(x-1),(y-1)};
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
@@ -441,6 +466,16 @@ void check_collisions() {
     void delay(int ms) { Sleep(ms);} // ms 단위 딜레이
     // Windows는 conio.h의 kbhit(), getch() 사용
 #else
+    // 터미널 Raw 모드 활성화/비활성화
+    void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
+    void enable_raw_mode() {
+        tcgetattr(STDIN_FILENO, &orig_termios);
+        atexit(disable_raw_mode);
+        struct termios raw = orig_termios;
+        raw.c_lflag &= ~(ECHO | ICANON);
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    }
+
     void gotoxy(int x, int y) {
         printf("\033[%d;%dH",y,x);
         fflush(stdout);
@@ -483,7 +518,7 @@ void check_collisions() {
         tcgetattr(STDIN_FILENO, &oldattr);
         newattr = oldattr;
         newattr.c_lflag &= ~(ICANON|ECHO);
-        tcsetattr(STDERR_FILENO, TCSANOW, &newattr);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
         ch = getchar();
         tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
         return ch;
