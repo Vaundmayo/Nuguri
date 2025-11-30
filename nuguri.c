@@ -320,7 +320,6 @@ void load_maps() {
 // 현재 스테이지 초기화
 void init_stage() {
     enemy_count = 0;
-    coin_count = 0;
     is_jumping = 0;
     velocity_y = 0;
 
@@ -455,6 +454,8 @@ void move_player(char input) {
                     break;
                 }
                 player_y = ch_y; // 충돌 없으면 1칸 이동
+
+                check_collisions(); // 이동 후 충돌 체크
             }
 
             // 중력 적용
@@ -473,7 +474,7 @@ void move_player(char input) {
     
     if (player_y >= map_height) init_stage();
 
-    // 바닥 끼임 확인 -> x,y 되돌리기
+    // 벽 끼임 확인 -> x,y 되돌리기
     if (player_x >= 0 && player_x < map_width && 
         player_y >= 0 && player_y < map_height &&
         map[stage][next_y][player_x] == '#') {
