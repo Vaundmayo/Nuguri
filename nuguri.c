@@ -512,6 +512,7 @@ void check_collisions() {
     for (int i = 0; i < coin_count; i++) {
         if (!coins[i].collected && player_x == coins[i].x && player_y == coins[i].y) {
             coins[i].collected = 1;
+            map[stage][player_y][player_x] = ' '; // map 배열에서 코인 제거
             score += 20;
             playsound(sound_COIN);
         }
@@ -663,6 +664,10 @@ void game_over() {
 		stage = 0;
 		score = 0;
 		life = 3;
+
+        free_maps(); // 먹은 코인 초기화를 위해 맵 메모리 해제
+		load_maps(); // 맵 다시 로드
+
 		init_stage();
 		return;
 	}
