@@ -193,6 +193,32 @@ void playsound(Play type) {
             break;
     }
 }
+#elif defined(__APPLE__)
+// macOS에서는 afplay 명령어 사용
+void playsound(Play type) {
+    // system 함수에서 &으로 백그라운드에서 실행
+    // > /dev/null 2>&1 불필요한 터미널 출력을 숨김
+    switch (type) {
+        case sound_JUMP:
+            system("afplay /System/Library/Sounds/Tink.aiff > /dev/null 2>&1 &");
+            break;
+        case sound_COIN:
+            system("afplay /System/Library/Sounds/Ping.aiff > /dev/null 2>&1 &");
+            break;
+        case sound_ENEMY:
+            system("afplay /System/Library/Sounds/Basso.aiff > /dev/null 2>&1 &");
+            break;
+        case sound_CLEAR:
+            system("afplay /System/Library/Sounds/Hero.aiff > /dev/null 2>&1 &");
+            break;
+        case sound_GAMEOVER:
+            system("afplay /System/Library/Sounds/Sosumi.aiff > /dev/null 2>&1 &");
+            break;
+        default:
+            printf("\a");
+            break;
+    }
+}
 #else
 void playsound(Play type) {
     switch (type) {
