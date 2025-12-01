@@ -105,7 +105,8 @@ int main() {
 
     while (!game_over && stage < MAX_STAGES) {
         if (kbhit()) {
-	    c = getch();
+            while(kbhit()) { // 버퍼 비우기
+	            c = getch();
 
 	#ifdef _WIN32
 	    // Windows 방향키 입력 처리
@@ -130,11 +131,11 @@ int main() {
 	        }
 	    }
 	#endif
-	    if (c == 'q') {
-	        game_over = 1;
-	        continue;
-	    }
-
+	        if (c == 'q') {
+	            game_over = 1;
+	            continue;
+	        }
+        }
 	}
 	
 	else {
