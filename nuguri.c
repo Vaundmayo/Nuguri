@@ -321,6 +321,7 @@ void load_maps() {
 // 현재 스테이지 초기화
 void init_stage() {
     enemy_count = 0;
+    coin_count = 0;
     is_jumping = 0;
     velocity_y = 0;
 
@@ -692,12 +693,7 @@ void game_over() {
 }
 
 void ending() {
-    #ifdef _WIN32
-        system("cls");
-    #else
-        clrscr();
-    #endif
-
+    clrscr();
     printf("\n\n");
     printf("   ##   #    #       ###  #    ###   ##  ### \n");
     printf("  #  #  #    #      #     #    #    #  # #  #\n");
@@ -706,9 +702,12 @@ void ending() {
     printf("  #  #  #### ####    ###  #### ###  #  # #  #\n");
     printf("\n\n");
     printf("               최종 점수: %d\n", score);
-    printf("           PRESS ANY KEY TO QUIT\n");
+    printf("           PRESS ANY KEY TO QUIT\n");   
     playsound(sound_CLEAR);
-
+    while(kbhit()){
+        getch();
+    }
+    
     getch();
     clrscr();
     free_maps();
