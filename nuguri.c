@@ -159,6 +159,8 @@ int main() {
         }
     }
 
+
+    free_maps();
     disable_raw_mode();
     show_cursor();
     return 0;
