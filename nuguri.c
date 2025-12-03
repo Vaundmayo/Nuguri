@@ -121,7 +121,7 @@ int main() {
 	    }
 	#else
 	    // Linux 방향키 처리
-	    if (c == '\x1b') {
+	    if (c == '\033') {
 	        getch(); // '['
 	        switch (getch()) {
 	            case 'A': c = 'w'; break;
@@ -627,13 +627,13 @@ void check_collisions() {
 
 // 커서 숨기기
 void hide_cursor() {
-    printf("\x1b[?25l");
+    printf("\033[?25l");
     fflush(stdout);
 }
 
 // 커서 다시 보이기
 void show_cursor() {
-    printf("\x1b[?25h");
+    printf("\033[?25h");
     fflush(stdout);
 }
 
