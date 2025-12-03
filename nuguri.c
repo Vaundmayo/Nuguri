@@ -424,7 +424,7 @@ void move_player(char input) {
     // 벽 끼임 확인 -> x,y 되돌리기
     if (player_x >= 0 && player_x < map_width && 
         player_y >= 0 && player_y < map_height &&
-        map[stage][next_y][player_x] == '#') {
+        map[stage][player_y][player_x] == '#') {
         player_x = before_x;
     }
 }
