@@ -355,7 +355,7 @@ void move_player(char input) {
 
     if (next_x >= 0 && next_x < map_width && map[stage][player_y][next_x] != '#') player_x = next_x;
 
-    if(input == 's' && map[stage][player_y + 2][player_x] == 'H' && map[stage][player_y + 1][player_x] != 'H') { // 사다리 내려가기 구현
+    if(input == 's' && player_y +2 < map_height && map[stage][player_y + 2][player_x] == 'H' && map[stage][player_y + 1][player_x] != 'H') { // 사다리 내려가기 구현
         next_y = player_y + 2; // 바닥 밑 사다리가 존재하면 2칸 아래로 이동
         player_y = next_y;
         is_jumping = 0;
