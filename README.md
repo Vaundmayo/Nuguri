@@ -148,55 +148,55 @@ make
 ### 4.1 타이틀 화면 (시작)
 - 게임 시작시 나오는 화면
 
-![title](screenshot_title.PNG)
+![title](screenshot/screenshot_title.PNG)
 
 
 ### 4.2 stage1
 - 첫번째 맵 화면
 
-![stage1](screenshot_stage1.PNG)
+![stage1](screenshot/screenshot_stage1.PNG)
 
 
 ### 4.3 stage2
 - 두번째 맵 화면
 
-![stage2](screenshot_stage2.PNG)
+![stage2](screenshot/screenshot_stage2.PNG)
 
 
 ### 4.4 점프 화면
 - space 동작 시 점프
 
-![jump](screenshot_jump.png)
+![jump](screenshot/screenshot_jump.png)
 
 
 ### 4.5 사디리 이동
 - ↑ ↓ 방향키 동작 시 사다리 이동
 
-![H](screenshot_H.png)
+![H](screenshot/screenshot_H.png)
 
 
 ### 4.6 코인 획득 -> 점수 증가
 - 코인 획득 시 20점이 증가되고 코인이 사라짐
 
-![coin](screenshot_coin.png)
+![coin](screenshot/screenshot_coin.png)
 
 
 ### 4.7 적과 충돌
 - 적과 충돌하면 재시작 되고 life가 1개 감소
 
-![enemy](screenshot_enemy.png)
+![enemy](screenshot/screenshot_enemy.png)
 
 
 ### 4.8 게임오버 화면
 - 게임오버 화면이 뜨면서 재시작(ENTER) 혹은 종료(Q) 선택
 
-![gameover](screenshot_gameover.PNG)
+![gameover](screenshot/screenshot_gameover.PNG)
 
 
 ### 4.9 클리어 화면 (엔딩)
 - 게임 완료시 나오는 화면
 
-![clear](screenshot_clear.PNG)
+![clear](screenshot/screenshot_clear.PNG)
 
 ---
 
