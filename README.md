@@ -1,3 +1,6 @@
+# 깃허브 주소
+https://github.com/Vaundmayo/Nuguri.git
+
 # 너구리 게임 실행 보고서
 
 ## 1. 프로젝트 개요
