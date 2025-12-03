@@ -61,10 +61,8 @@ nuguri.exe
 ###  Linux / macOS
 
 ```bash
-make
+gcc -o nuguri nuguri.c
 ./nuguri
-또는
-make run
 ```
 
 * 사운드는 Linux('\a'), macOS(afplay) 적용
