@@ -26,7 +26,7 @@ https://github.com/Vaundmayo/Nuguri.git
 | 사용 언어 | C 언어 |
 | 개발 환경 | Windows 10 / Ubuntu 22.04 / macOS |
 | IDE 및 도구 | Visual Studio Code + GitHub |
-| 컴파일러 | MinGW, GCC, Clang |
+| 컴파일러 | MinGW, GCC |
 | 주요 라이브러리 | stdio.h, stdlib.h, string.h, time.h, termios.h, unistd.h 등 |
 | 실행 방식 | 텍스트 기반 콘솔 게임 (터미널 실행) |
 | 버전 관리 | Git / GitHub (기능 단위 커밋 기록) |
@@ -63,11 +63,14 @@ nuguri.exe
 ```bash
 make
 ./nuguri
+또는
+make run
 ```
 
 * 사운드는 Linux('\a'), macOS(afplay) 적용
 * vscode에서 WSL을 사용할 경우 아래 설정이 꺼져 있으면 소리가 들리지 않을 수 있다.
   - 설정 경로: Ctrl + , -> 검색창에 "terminal bell" 입력 -> sound = on
+* 시스템 소리가 음소거 되어 있으면 안된다.
 
 ###  실행 시 유의사항
 
