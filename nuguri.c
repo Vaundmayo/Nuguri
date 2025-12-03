@@ -31,7 +31,6 @@ typedef struct {
 } Coin;
 
 typedef enum {
-    sound_JUMP,
     sound_COIN,
     sound_ENEMY,
     sound_CLEAR,
@@ -346,7 +345,6 @@ void move_player(char input) {
             if (!is_jumping && (floor_tile == '#' || on_ladder)) {
                 is_jumping = 1;
                 velocity_y = -2;
-                playsound(sound_JUMP);
             }
             break;
     }
@@ -480,9 +478,6 @@ void check_collisions() {
 
     void playsound(Play type) {
         switch(type) {
-            case sound_JUMP:
-                Beep(800,50);
-                break;
             case sound_COIN:
                 Beep(1800,50);
                 break;
@@ -511,9 +506,6 @@ void check_collisions() {
         // system 함수에서 &으로 백그라운드에서 실행
         // > /dev/null 2>&1 불필요한 터미널 출력을 숨김
         switch (type) {
-            case sound_JUMP:
-                system("afplay /System/Library/Sounds/Tink.aiff > /dev/null 2>&1 &");
-                break;
             case sound_COIN:
                 system("afplay /System/Library/Sounds/Ping.aiff > /dev/null 2>&1 &");
                 break;
@@ -592,9 +584,6 @@ void check_collisions() {
 
     void playsound(Play type) {
         switch (type) {
-            case sound_JUMP:
-                printf("\a");
-                break;
             case sound_COIN:
                 printf("\a");
                 break;
