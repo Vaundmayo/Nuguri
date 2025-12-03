@@ -158,6 +158,8 @@ int main() {
         }
     }
 
+
+    free_maps();
     disable_raw_mode();
     show_cursor();
     return 0;
@@ -351,7 +353,7 @@ void move_player(char input) {
 
     if (next_x >= 0 && next_x < map_width && map[stage][player_y][next_x] != '#') player_x = next_x;
 
-    if(input == 's' && map[stage][player_y + 2][player_x] == 'H' && map[stage][player_y + 1][player_x] != 'H') { // 사다리 내려가기 구현
+    if(input == 's' && player_y +2 < map_height && map[stage][player_y + 2][player_x] == 'H' && map[stage][player_y + 1][player_x] != 'H') { // 사다리 내려가기 구현
         next_y = player_y + 2; // 바닥 밑 사다리가 존재하면 2칸 아래로 이동
         player_y = next_y;
         is_jumping = 0;
@@ -420,7 +422,7 @@ void move_player(char input) {
     // 벽 끼임 확인 -> x,y 되돌리기
     if (player_x >= 0 && player_x < map_width && 
         player_y >= 0 && player_y < map_height &&
-        map[stage][next_y][player_x] == '#') {
+        map[stage][player_y][player_x] == '#') {
         player_x = before_x;
     }
 }
@@ -500,30 +502,9 @@ void check_collisions() {
                 break;
         }
     }
-#elif defined(__APPLE__)
-    // macOS에서는 afplay 명령어 사용
-    void playsound(Play type) {
-        // system 함수에서 &으로 백그라운드에서 실행
-        // > /dev/null 2>&1 불필요한 터미널 출력을 숨김
-        switch (type) {
-            case sound_COIN:
-                system("afplay /System/Library/Sounds/Ping.aiff > /dev/null 2>&1 &");
-                break;
-            case sound_ENEMY:
-                system("afplay /System/Library/Sounds/Basso.aiff > /dev/null 2>&1 &");
-                break;
-            case sound_CLEAR:
-                system("afplay /System/Library/Sounds/Hero.aiff > /dev/null 2>&1 &");
-                break;
-            case sound_GAMEOVER:
-                system("afplay /System/Library/Sounds/Sosumi.aiff > /dev/null 2>&1 &");
-                break;
-            default:
-                printf("\a");
-                break;
-        }
-    }
-#else
+
+#else // Linux + macOS
+
     // 터미널 Raw 모드 활성화/비활성화
     void disable_raw_mode() { tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios); }
     void enable_raw_mode() {
@@ -582,36 +563,61 @@ void check_collisions() {
         return ch;
     }
 
-    void playsound(Play type) {
-        switch (type) {
-            case sound_COIN:
-                printf("\a");
-                break;
-            case sound_ENEMY:
-                printf("\a");
-                break;
-            case sound_CLEAR:
-                printf("\a"); fflush(stdout); // 소리 즉시 출력 (버퍼 비우기)
-                delay(300);
-                printf("\a"); fflush(stdout);
-                delay(300);
-                printf("\a");
-                break;
-            case sound_GAMEOVER:
-                printf("\a"); fflush(stdout); // 소리 즉시 출력 (버퍼 비우기)
-                delay(200);
-                printf("\a"); fflush(stdout);
-                delay(200);
-                printf("\a"); fflush(stdout);
-                delay(200);
-                printf("\a");
-                break; 
-            default:
-                printf("\a");
-                break;
+    #if defined(__APPLE__)
+        // macOS에서는 afplay 명령어 사용
+        void playsound(Play type) {
+            // system 함수에서 &으로 백그라운드에서 실행
+            // > /dev/null 2>&1 불필요한 터미널 출력을 숨김
+            switch (type) {
+                case sound_COIN:
+                    system("afplay /System/Library/Sounds/Ping.aiff > /dev/null 2>&1 &");
+                    break;
+                case sound_ENEMY:
+                    system("afplay /System/Library/Sounds/Basso.aiff > /dev/null 2>&1 &");
+                    break;
+                case sound_CLEAR:
+                    system("afplay /System/Library/Sounds/Hero.aiff > /dev/null 2>&1 &");
+                    break;
+                case sound_GAMEOVER:
+                    system("afplay /System/Library/Sounds/Sosumi.aiff > /dev/null 2>&1 &");
+                    break;
+                default:
+                    printf("\a");
+                    break;
         }
-        fflush(stdout);
     }
+    #else
+        void playsound(Play type) {
+            switch (type) {
+                case sound_COIN:
+                    printf("\a");
+                    break;
+                case sound_ENEMY:
+                    printf("\a");
+                    break;
+                case sound_CLEAR:
+                    printf("\a"); fflush(stdout); // 소리 즉시 출력 (버퍼 비우기)
+                    delay(300);
+                    printf("\a"); fflush(stdout);
+                    delay(300);
+                    printf("\a");
+                    break;
+                case sound_GAMEOVER:
+                    printf("\a"); fflush(stdout); // 소리 즉시 출력 (버퍼 비우기)
+                    delay(200);
+                    printf("\a"); fflush(stdout);
+                    delay(200);
+                    printf("\a"); fflush(stdout);
+                    delay(200);
+                    printf("\a");
+                    break; 
+                default:
+                    printf("\a");
+                    break;
+            }
+            fflush(stdout);
+        }
+    #endif
 #endif
 
 // 커서 숨기기
