@@ -310,7 +310,7 @@ void draw_game() {
     #ifdef _WIN32
         gotoxy(1, 1); // 윈도우에서는 좌표만 이동
     #else
-        clrscr(); // 유닉스 계열에서는 화면 전체 클리어
+        clrscr(); // Linux/macOS 에서는 화면 전체 클리어
     #endif
     // 스테이지, 점수, 라이프, 조작 키 소개
     printf("Stage: %d | Score: %d\n", stage + 1, score);
