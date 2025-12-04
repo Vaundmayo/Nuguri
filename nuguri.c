@@ -468,7 +468,7 @@ void move_player(char input) {
     if (player_x >= 0 && player_x < map_width && 
         player_y >= 0 && player_y < map_height &&
         map[stage][player_y][player_x] == '#') {
-        player_x = before_x; // 벽인면 x좌표를 이전값으로 되돌림
+        player_x = before_x; // 벽인 면 x좌표를 이전값으로 되돌림
     }
 }
 
